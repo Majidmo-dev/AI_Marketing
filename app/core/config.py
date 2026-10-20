@@ -1,4 +1,7 @@
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PLACEHOLDER_JWT_SECRETS = {"unsafe-local-only-change-me", "replace-with-a-long-random-secret"}
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -20,6 +23,12 @@ class Settings(BaseSettings):
     stripe_default_price_id: str = ""
     openai_api_key: str = ""
     openai_model: str = "gpt-4.1-mini"
+
+    @model_validator(mode="after")
+    def require_real_secret_outside_local(self):
+        if self.environment != "local" and (self.jwt_secret_key in PLACEHOLDER_JWT_SECRETS or len(self.jwt_secret_key) < 32):
+            raise ValueError("JWT_SECRET_KEY must be a unique random value of at least 32 characters outside the local environment")
+        return self
 
     @property
     def agency_admin_email_set(self) -> set[str]:
