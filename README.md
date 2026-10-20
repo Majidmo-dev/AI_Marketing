@@ -9,7 +9,10 @@ Multi-tenant starter for an agency that creates client workspaces and invites cl
 4. In another terminal run `docker compose exec api python -m app.bootstrap_admin`.
 5. Visit http://localhost:8000/docs.
 
-Local development creates tables automatically. In production, set `AUTO_CREATE_TABLES=false` and use Alembic migrations.
+Local development creates tables automatically. In production, set `AUTO_CREATE_TABLES=false` and use Alembic migrations:
+- Apply: `docker compose exec api alembic upgrade head`
+- After changing models: `docker compose exec api alembic revision --autogenerate -m "describe change"`, review the generated file, then upgrade.
+- A database whose tables were already created automatically should be marked as current once with `alembic stamp head` instead of upgraded.
 
 ## Included
 - FastAPI, PostgreSQL, async SQLAlchemy
